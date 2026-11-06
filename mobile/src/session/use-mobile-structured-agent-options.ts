@@ -28,6 +28,7 @@ const NO_COMMANDS: readonly AgentSessionConversationCommand[] = []
 
 export function useMobileStructuredAgentOptions(args: {
   agent: string | null
+  hostId?: string
   client: RpcClient | null
   sessionId: string | null
   enabled: boolean
@@ -51,6 +52,7 @@ export function useMobileStructuredAgentOptions(args: {
 }) {
   const {
     agent,
+    hostId = null,
     client,
     enabled,
     fence,
@@ -95,6 +97,7 @@ export function useMobileStructuredAgentOptions(args: {
     sessionId,
     turnId,
     unloadedTurnRevisions,
+    hostId,
     client,
     optionStamp,
     sendSelection: hostSupport?.sendSelection === true,
@@ -138,6 +141,7 @@ export function useMobileStructuredAgentOptions(args: {
       hostSupport?.modelEffortDiscovery && modelOption?.kind.type === 'select'
         ? modelOption.kind.currentValue
         : undefined,
+    hostId,
     client,
     sessionId,
     enabled,

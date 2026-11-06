@@ -29,7 +29,8 @@ import type { RpcClient } from '../../../transport/rpc-client'
 import { structuredAgentSessionHostSupport } from '../../mobile-structured-agent-session-host-support'
 import { AGENT_SESSION_RUNTIME_CAPABILITIES } from '../../../../../src/shared/agent-session/agent-session-runtime-capabilities'
 import { createElement, type ComponentProps } from 'react'
-import { act, create, type ReactTestRenderer } from 'react-test-renderer'
+import { act, type ReactTestRenderer } from 'react-test-renderer'
+import { createWithQueryClient } from '../../../test-support/query-client-test-renderer'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   MobileNativeChatComposer as NativeChatComposer,
@@ -242,7 +243,7 @@ describe('MobileNativeChatComposer on a structured chat', () => {
         })
       }
       await act(async () => {
-        renderer = create(createElement(Conversation))
+        renderer = createWithQueryClient(createElement(Conversation))
       })
       act(() => publish?.(snapshotEvent()))
       expect(labelled('Remove image')[0]).toBeDefined()
@@ -346,7 +347,7 @@ describe('MobileNativeChatComposer on a structured chat', () => {
         })
       }
       await act(async () => {
-        renderer = create(createElement(Conversation))
+        renderer = createWithQueryClient(createElement(Conversation))
       })
       act(() => publish?.(snapshotEvent()))
       act(() => field().props.onSelectionChange({ nativeEvent: { selection: { end: 3 } } }))
@@ -469,7 +470,7 @@ describe('MobileNativeChatComposer on a structured chat', () => {
       })
     }
     await act(async () => {
-      renderer = create(createElement(Conversation))
+      renderer = createWithQueryClient(createElement(Conversation))
     })
     await act(async () =>
       publish?.({
@@ -517,7 +518,7 @@ describe('MobileNativeChatComposer on a structured chat', () => {
       skills: [{ name: 'review', path: '/remote/SKILL.md' }]
     }))
     await act(async () => {
-      renderer = create(
+      renderer = createWithQueryClient(
         createElement(MobileNativeChatComposer, {
           draftScopeKey: scope,
           value: '$review draft',
