@@ -112,11 +112,52 @@ test('Find preserves Shift-click, double-click, and multi-paragraph copy selecti
       .last()
       .locator('span.rounded-full')
   ).toHaveCount(0)
+  // DIAGNOSTIC ONLY (do not merge): trace selection ownership on Linux CI.
+  await orcaPage.evaluate(() => {
+    const w = window as unknown as Record<string, unknown>
+    const log: string[] = []
+    w.__dbg = log
+    const pmDom = document.querySelector('.ProseMirror.rich-markdown-editor')
+    const view = (pmDom as unknown as { editor?: { view: any } } | null)?.editor?.view
+    const describe = (node: Node | null) =>
+      node ? `${node.nodeName}:${(node.textContent ?? '').slice(0, 16)}` : 'null'
+    const snap = (label: string) => {
+      const sel = window.getSelection()
+      const cur = view?.domObserver?.currentSelection
+      log.push(
+        `${label} active=${document.activeElement?.tagName} docFocus=${document.hasFocus()} dom=${describe(sel?.anchorNode ?? null)}@${sel?.anchorOffset}->${describe(sel?.focusNode ?? null)}@${sel?.focusOffset} pm=${view?.state.selection.anchor}-${view?.state.selection.head} pmFocus=${view?.hasFocus()} cur=${describe(cur?.anchorNode ?? null)}@${cur?.anchorOffset} md=${!!view?.input?.mouseDown} ua=${navigator.userAgent.includes('Chrome/')}`
+      )
+    }
+    w.__snap = snap
+    if (view) {
+      const focus = view.focus.bind(view)
+      view.focus = () => {
+        snap('view.focus:before')
+        focus()
+        snap('view.focus:after')
+      }
+    } else {
+      log.push('no view')
+    }
+    document.addEventListener('mousedown', (e) => snap(`md-capture prevented=${e.defaultPrevented}`), true)
+    document.addEventListener('mousedown', (e) => snap(`md-bubble prevented=${e.defaultPrevented}`))
+    document.addEventListener('mouseup', () => snap('mouseup'), true)
+    document.addEventListener('selectionchange', () => snap('selchange'))
+    document.addEventListener('focusin', () => snap('focusin'))
+  })
+  const mark = (label: string) =>
+    orcaPage.evaluate((l) => (window as unknown as { __snap: (x: string) => void }).__snap(l), label)
   await orcaPage.mouse.click(start.x, start.y)
+  await mark('after-click')
   await search.focus()
+  await mark('after-search-focus')
   await orcaPage.keyboard.down('Shift')
   await orcaPage.mouse.click(end.x, end.y)
   await orcaPage.keyboard.up('Shift')
+  await mark('after-shift-click')
+  console.log(
+    `DBG-MDFIND\n${await orcaPage.evaluate(() => ((window as unknown as { __dbg: string[] }).__dbg ?? []).join('\n'))}`
+  )
   expect(await selectedText(orcaPage)).toBe(`${FIRST.slice(6)}\n\n${SECOND.slice(0, 11)}`)
   const copied = await editor.evaluate((element) => {
     const clipboard = new DataTransfer()
