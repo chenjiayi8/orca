@@ -6,11 +6,12 @@ export const SERVE_COMMAND_SPECS: CommandSpec[] = [
     path: ['serve'],
     summary: 'Start an Orca runtime server without opening a desktop window',
     usage:
-      'orca serve [--port <port>] [--pairing-address <host>] [--mobile-pairing] [--no-pairing] [--grant-desktop-control] [--project-root <path>] [--recipe-json] [--supervise] [--force] [--reclaim-stale-lock [--data-root <dir>] [--yes]] [--json]',
+      'orca serve [--port <port>] [--pairing-address <host>] [--allow-public] [--mobile-pairing] [--no-pairing] [--grant-desktop-control] [--project-root <path>] [--recipe-json] [--supervise] [--force] [--reclaim-stale-lock [--data-root <dir>] [--yes]] [--json]',
     allowedFlags: [
       ...LOCAL_COMMAND_FLAGS,
       'port',
       'pairing-address',
+      'allow-public',
       'mobile-pairing',
       'no-pairing',
       'grant-desktop-control',
@@ -26,6 +27,7 @@ export const SERVE_COMMAND_SPECS: CommandSpec[] = [
       'Runs in the foreground and prints the bound endpoint, advertised endpoint, and pairing status. Stop it with Ctrl+C.',
       'With --port, serve exits with an error when that port is already in use. Without it, serve uses 6768 and moves to another port when 6768 is taken.',
       '--pairing-address changes only the client-advertised address; use a reachable LAN, Tailscale, SSH-forward, or reverse-proxy endpoint.',
+      'Serve accepts clients from localhost, LAN (10/8, 172.16/12, 192.168/16, link-local, fc00::/7) and Tailscale (100.64/10, fd7a:115c:a1e0::/48) addresses. Public addresses are also accepted with --allow-public, when --pairing-address is a hostname or public IP, once a paired device has connected from one, or while devices paired before this check existed remain paired. The startup log states which applies.',
       'Use --recipe-json with --project-root from VM recipes to print the recipe result JSON and leave the server running.',
       'Use --mobile-pairing to print a mobile-scoped pairing QR/link instead of the default runtime-environment pairing link.',
       "A paired client cannot drive this machine's desktop (orca computer) unless the offer was created with --grant-desktop-control.",
@@ -62,8 +64,15 @@ export const SERVE_COMMAND_SPECS: CommandSpec[] = [
     path: ['serve', 'service', 'install'],
     summary: 'Run orca serve as a per-user background service that restarts itself',
     usage:
-      'orca serve service install [--port <port>] [--pairing-address <host>] [--command <path>] [--dry-run] [--json]',
-    allowedFlags: [...LOCAL_COMMAND_FLAGS, 'port', 'pairing-address', 'command', 'dry-run'],
+      'orca serve service install [--port <port>] [--pairing-address <host>] [--allow-public] [--command <path>] [--dry-run] [--json]',
+    allowedFlags: [
+      ...LOCAL_COMMAND_FLAGS,
+      'port',
+      'pairing-address',
+      'allow-public',
+      'command',
+      'dry-run'
+    ],
     notes: [
       'macOS writes a LaunchAgent; Linux writes a systemd user unit. Both run `orca serve --supervise --no-pairing` for this profile, so the server restarts with growing delays and gives up after repeated failures instead of looping.',
       'The service never prints a pairing link to its log. Pair clients from the desktop app, or with `orca serve` in a terminal while the service is stopped.',

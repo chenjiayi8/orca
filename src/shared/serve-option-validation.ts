@@ -37,7 +37,9 @@ const SERVE_SECURITY_FLAG_NAMES = [
   '--recipe-json',
   '--serve-recipe-json',
   '--pairing-address',
-  '--serve-pairing-address'
+  '--serve-pairing-address',
+  '--allow-public',
+  '--serve-allow-public'
 ] as const
 
 const SERVE_VALUE_FLAG_NAMES = new Set([

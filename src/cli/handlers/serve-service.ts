@@ -59,7 +59,12 @@ function requireManager(platform: NodeJS.Platform): void {
 
 function serviceSpec(
   deps: ServeServiceDeps,
-  options: { command: string; port?: string | null; pairingAddress?: string | null }
+  options: {
+    command: string
+    port?: string | null
+    pairingAddress?: string | null
+    allowPublic?: boolean
+  }
 ): ServeServiceSpec {
   return renderServeService({
     platform: deps.platform,
@@ -69,7 +74,8 @@ function serviceSpec(
     defaultUserDataPath: getPlatformUserDataPath(deps.platform, deps.homeDir),
     path: resolveServicePath(deps.env),
     port: options.port,
-    pairingAddress: options.pairingAddress
+    pairingAddress: options.pairingAddress,
+    allowPublic: options.allowPublic
   })
 }
 
@@ -99,6 +105,7 @@ export async function installServeService(
     command: string | null
     port?: string | null
     pairingAddress?: string | null
+    allowPublic?: boolean
     dryRun: boolean
   },
   deps: ServeServiceDeps = defaultDeps()
@@ -243,6 +250,7 @@ export const SERVE_SERVICE_HANDLERS: Record<string, CommandHandler> = {
       // Validate before launchd can loop on a bad value and trip the supervisor brake.
       port: getOptionalServePort(flags),
       pairingAddress: optionalString(flags.get('pairing-address')),
+      allowPublic: flags.get('allow-public') === true,
       dryRun: flags.get('dry-run') === true
     })
     emit(result, json, formatServeServiceInstall)
