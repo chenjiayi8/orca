@@ -137,3 +137,19 @@ describe('runtime host status E2E routing', () => {
     ).not.toContain(spec)
   })
 })
+
+describe('startup exec readiness E2E routing', () => {
+  const spec = 'tests/e2e/paired-startup-exec-readiness.spec.ts'
+  it.each([
+    'src/main/daemon/sessions/session-shell-ready-barrier.ts',
+    'src/main/daemon/shell-readiness/post-ready-flush-gate.ts',
+    'src/main/pty/shell-startup/shell-templates.ts'
+  ])('routes %s', (path) => {
+    expect(selectPrE2eSpecs([path])).toContain(spec)
+  })
+  it('does not route unit tests of those sources', () => {
+    expect(
+      selectPrE2eSpecs(['src/main/daemon/shell-readiness/testing/shell-ready.test.ts'])
+    ).not.toContain(spec)
+  })
+})
