@@ -6,6 +6,8 @@ const doubles = vi.hoisted(() => ({
   fetch: (): Promise<unknown> => Promise.reject(new Error('no fetch staged'))
 }))
 
+vi.mock('./bundled-activity-page', () => ({ bundledActivityPage: () => null }))
+
 vi.mock('expo-file-system', () => ({ Directory: class {}, File: class {}, Paths: { cache: '' } }))
 vi.mock('../transport/rpc-operation', () => ({
   defineRpcOperation: (definition: unknown) => definition,

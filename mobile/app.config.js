@@ -5,6 +5,17 @@ const APS_ENVIRONMENT =
 
 module.exports = ({ config }) => ({
   ...config,
+  ...(process.env.ORCA_ACTIVITY_TEST_BUILD === '1'
+    ? {
+        name: 'Orca Activity',
+        scheme: 'orca-activity',
+        android: {
+          ...config.android,
+          package: 'com.chenjiayi8.orca.activity',
+          googleServicesFile: undefined
+        }
+      }
+    : {}),
   // `expo run` installs a dev-client build cached for the current native fingerprint instead of
   // rebuilding; scripts/native-client.mjs populates the cache.
   buildCacheProvider: { plugin: './scripts/native-build-cache.cjs' },

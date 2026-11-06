@@ -1,3 +1,4 @@
+import { bundledActivityPage } from './bundled-activity-page'
 import { fetchMobileWebBundle } from '../transport/web-bundle/mobile-web-bundle-fetch'
 import { mobileWebBundleManifestRead } from '../transport/web-bundle/mobile-web-bundle-operations'
 import { runRpcOperation } from '../transport/rpc-operation'
@@ -59,8 +60,10 @@ export async function readManifest(
     return
   }
   try {
-    const opened = await runRpcOperation(client, mobileWebBundleManifestRead, null)
-    const manifest = opened.manifest
+    const packaged = bundledActivityPage()
+    const manifest =
+      packaged?.manifest ??
+      (await runRpcOperation(client, mobileWebBundleManifestRead, null)).manifest
     send({
       type: 'manifest-read',
       flow,
@@ -102,12 +105,14 @@ export async function download(args: {
   try {
     // Unavailable reuse is a cache miss, not a download failure.
     const reusable = await store.openReusableAssets(hostKey).catch(() => undefined)
-    const fetched = await fetchMobileWebBundle({
-      client,
-      signal: controller.signal,
-      onProgress: (progress) => send({ type: 'fetch-progress', flow, ...progress }),
-      reusable
-    })
+    const fetched =
+      bundledActivityPage() ??
+      (await fetchMobileWebBundle({
+        client,
+        signal: controller.signal,
+        onProgress: (progress) => send({ type: 'fetch-progress', flow, ...progress }),
+        reusable
+      }))
     // Recheck abort after fetch’s last read so an abandoned screen cannot stage a generation.
     if (controller.signal.aborted) {
       return
